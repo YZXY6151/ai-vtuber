@@ -1,0 +1,69 @@
+# services/tts/app.py
+
+import os
+import io
+import asyncio
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from gtts import gTTS
+from fastapi.responses import StreamingResponse
+
+app = FastAPI()
+
+# CORS 白名单从环境变量读取，开发时可设置为 "*"
+allowed = os.getenv("ALLOWED_ORIGINS", "*")
+origins = allowed.split(",") if allowed != "*" else ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+class TTSRequest(BaseModel):
+    text: str
+    lang: str = "zh-cn"       # 支持通过请求参数指定语种，默认简体中文
+    slow: bool = False        # gTTS 的 slow 参数
+
+async def synthesize_to_buffer(text: str, lang: str, slow: bool) -> io.BytesIO:
+    """
+    在线程池中异步调用 gTTS，将生成的音频写入 BytesIO 并返回。
+    """
+    loop = asyncio.get_event_loop()
+    buf = io.BytesIO()
+    def _generate():
+        tts = gTTS(text=text, lang=lang, slow=slow)
+        tts.write_to_fp(buf)
+        buf.seek(0)
+        return buf
+
+    return await loop.run_in_executor(None, _generate)
+
+@app.post("/api/tts/synthesize")
+async def synthesize(req: TTSRequest):
+    # 文本长度限制，防止超长请求
+    text = req.text.strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="文本不能为空")
+    if len(text) > 500:
+        text = text[:500]
+
+    try:
+        buf = await synthesize_to_buffer(text, req.lang, req.slow)
+    except Exception as e:
+        # 记录日志并返回错误
+        app.logger.error(f"TTS 合成失败: {e}")
+        raise HTTPException(status_code=500, detail="语音合成失败，请稍后重试")
+
+    # 使用 StreamingResponse 分块返回，节省内存
+    def iterfile():
+        while True:
+            chunk = buf.read(1024 * 8)
+            if not chunk:
+                break
+            yield chunk
+
+    return StreamingResponse(iterfile(), media_type="audio/mpeg")
