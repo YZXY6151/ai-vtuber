@@ -1,5 +1,3 @@
-# services/tts/app.py
-
 import os
 import io
 import asyncio
@@ -11,13 +9,10 @@ from fastapi.responses import StreamingResponse
 
 app = FastAPI()
 
-# CORS 白名单从环境变量读取，开发时可设置为 "*"
-allowed = os.getenv("ALLOWED_ORIGINS", "*")
-origins = allowed.split(",") if allowed != "*" else ["*"]
-
+# 修改后的 CORS 配置：允许本地前端地址
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["http://127.0.0.1:5173", "http://localhost:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -44,7 +39,6 @@ async def synthesize_to_buffer(text: str, lang: str, slow: bool) -> io.BytesIO:
 
 @app.post("/api/tts/synthesize")
 async def synthesize(req: TTSRequest):
-    # 文本长度限制，防止超长请求
     text = req.text.strip()
     if not text:
         raise HTTPException(status_code=400, detail="文本不能为空")
@@ -54,11 +48,8 @@ async def synthesize(req: TTSRequest):
     try:
         buf = await synthesize_to_buffer(text, req.lang, req.slow)
     except Exception as e:
-        # 记录日志并返回错误
-        app.logger.error(f"TTS 合成失败: {e}")
-        raise HTTPException(status_code=500, detail="语音合成失败，请稍后重试")
+        raise HTTPException(status_code=500, detail=f"语音合成失败：{e}")
 
-    # 使用 StreamingResponse 分块返回，节省内存
     def iterfile():
         while True:
             chunk = buf.read(1024 * 8)
