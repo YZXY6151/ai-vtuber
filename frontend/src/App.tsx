@@ -1,10 +1,11 @@
 // frontend/src/App.tsx
 import React from 'react';
 import { ChatFlow } from './components/ChatFlow';
+import { Live2DViewer } from './components/Live2DViewer'; // ⬅️ 新增
 import './App.css';
 
 /**
- * 全局错误边界组件，支持 children
+ * 全局错误边界组件
  */
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -47,8 +48,14 @@ export default function App() {
         <header className="mb-6">
           <h1 className="text-3xl font-bold">AI 虚拟主播演示</h1>
         </header>
-        <main className="w-full max-w-md">
-          <ChatFlow />
+        {/* ⬇️ 改为左右布局 */}
+        <main className="flex w-full max-w-5xl gap-4">
+          <div className="flex-1">
+            <ChatFlow />
+          </div>
+          <div className="w-[400px] h-[600px] bg-white rounded shadow p-2">
+            <Live2DViewer />
+          </div>
         </main>
       </div>
     </ErrorBoundary>

@@ -1,15 +1,23 @@
-// frontend/src/components/ChatFlow.tsx
 import React, { useState } from 'react';
 import { chatWithGPT, synthesizeSpeech } from '../services/api';
 
 type Status = 'idle' | 'processing';
+type Persona = 'gentle' | 'tsundere' | 'energetic' | 'cool';
+
+const personaMap: Record<Persona, string> = {
+  gentle: '温柔主播',
+  tsundere: '傲娇主播',
+  energetic: '活泼主播',
+  cool: '冷静主播',
+};
 
 export const ChatFlow: React.FC = () => {
   const [status, setStatus] = useState<Status>('idle');
-  const [input, setInput]   = useState('');
+  const [input, setInput] = useState('');
   const [message, setMessage] = useState('');
-  const [reply,   setReply]   = useState('');
-  const [error,   setError]   = useState('');
+  const [reply, setReply] = useState('');
+  const [error, setError] = useState('');
+  const [persona, setPersona] = useState<Persona>('gentle'); // 默认 persona
 
   const sendText = async () => {
     const text = input.trim();
@@ -21,12 +29,12 @@ export const ChatFlow: React.FC = () => {
 
     try {
       // 1. GPT
-      const { reply } = await chatWithGPT(text);
+      const { reply } = await chatWithGPT(text, persona);
       setReply(reply);
 
       // 2. TTS
       const blob = await synthesizeSpeech(reply);
-      const url  = URL.createObjectURL(blob);
+      const url = URL.createObjectURL(blob);
       const audio = new Audio(url);
       audio.onended = () => URL.revokeObjectURL(url);
       audio.play();
@@ -39,6 +47,22 @@ export const ChatFlow: React.FC = () => {
 
   return (
     <div className="p-4 space-y-4">
+      {/* 角色选择 */}
+      <div className="flex gap-2 items-center">
+        <label>角色：</label>
+        <select
+          className="border rounded px-2 py-1"
+          value={persona}
+          onChange={e => setPersona(e.target.value as Persona)}
+          disabled={status === 'processing'}
+        >
+          {Object.entries(personaMap).map(([key, label]) => (
+            <option key={key} value={key}>{label}</option>
+          ))}
+        </select>
+      </div>
+
+      {/* 输入区 */}
       <div className="flex gap-2">
         <input
           value={input}
@@ -57,6 +81,7 @@ export const ChatFlow: React.FC = () => {
         </button>
       </div>
 
+      {/* 展示区 */}
       {error && <p className="text-red-600">{error}</p>}
 
       {message && (

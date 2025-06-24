@@ -63,38 +63,16 @@ export async function recognizeAudio(file: File): Promise<{ transcription: strin
 // frontend/src/services/api.ts
 
 /** 2. GPT 对话（NLP） */
-export async function chatWithGPT(
-  message: string | Array<unknown>
-): Promise<{ reply: string }> {
-  // 类型保护：如果是数组，就取第一个元素；否则直接用
-  const text =
-    Array.isArray(message) && message.length > 0
-      ? String(message[0])
-      : String(message);
-
-  console.log('👉 chatWithGPT 最终 message:', text, typeof text);
-
-  const res = await fetchWithTimeout(`${NLP_BASE}/api/nlp/chat`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-    body: JSON.stringify({ message: text }),
+export async function chatWithGPT(message: string, persona: string): Promise<{ reply: string }> {
+  const res = await fetch("http://localhost:8182/api/nlp/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message, persona }),
   });
-
-  if (!res.ok) {
-    let errMsg = `NLP 请求失败：${res.status} ${res.statusText}`;
-    try {
-      const errJson = await res.json();
-      if (errJson.error) errMsg += ` - ${errJson.error}`;
-    } catch { }
-    throw new Error(errMsg);
-  }
-
-  try {
-    return await res.json();
-  } catch {
-    throw new Error('NLP 返回解析错误，非有效 JSON');
-  }
+  if (!res.ok) throw new Error("GPT请求失败");
+  return res.json();
 }
+
 
 
 /** 3. 语音合成（TTS） */
