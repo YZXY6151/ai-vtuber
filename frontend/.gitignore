@@ -1,5 +1,5 @@
-# Logs
-logs
+# === Logs ===
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -7,18 +7,48 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
+# === Dependency directories ===
+node_modules/
+.venv/
+venv/
 
-# Editor directories and files
-.vscode/*
+# === Build output ===
+dist/
+dist-ssr/
+*.local
+.cache/
+*.egg-info/
+
+# === Python ===
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.db
+
+# === Environment ===
+.env
+.env.local
+.env.*.local
+
+# === Editor ===
+.vscode/
 !.vscode/extensions.json
-.idea
+.idea/
 .DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+
+# === Docker (optional) ===
+*.docker
+*.tar
+docker-compose.override.yml
+
+# === Jupyter (if used) ===
+.ipynb_checkpoints/
+
+# === Git Large File Storage ===
+*.lfs
