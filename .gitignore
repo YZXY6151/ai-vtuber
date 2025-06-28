@@ -1,124 +1,31 @@
-# # === Logs ===
-# logs/
-# *.log
-# npm-debug.log*
-# yarn-debug.log*
-# yarn-error.log*
-# pnpm-debug.log*
-# lerna-debug.log*
+# Python venv（尤其你使用 local 目录部署）
+.venv/
+venv/
+services/**/venv/
 
-# # === Dependency directories ===
-# node_modules/
-# .venv/
-# venv/
+# 大模型和缓存
+models/
+ollama_models/
+*.bin
+*.ckpt
+*.safetensors
 
-# # === Build output ===
-# dist/
-# dist-ssr/
-# *.local
-# .cache/
-# *.egg-info/
-# out/
-# release/
-# *.asar
+# Python 缓存
+__pycache__/
+*.py[cod]
+*.egg-info/
 
-# # === Python ===
-# __pycache__/
-# *.py[cod]
-# *.pyo
-# *.pyd
-# *.db
-
-# # === Ollama / 模型文件 ===
-# ollama_models/
-# models/
-# weights/
-# *.bin
-# *.ckpt
-# *.safetensors
-# ~/.ollama/
-
-# # === 音频/视频/缓存输出 ===
-# *.wav
-# *.mp3
-# *.mp4
-# *.ogg
-# *.webm
-# output/
-# tmp/
-# cache/
-
-# # === Environment ===
-# .env
-# .env.local
-# .env.*.local
-
-# # === Editor ===
-# .vscode/
-# !.vscode/extensions.json
-# .idea/
-# .DS_Store
-# *.suo
-# *.ntvs*
-# *.njsproj
-# *.sln
-# *.sw?
-
-# # === Docker (optional) ===
-# *.docker
-# *.tar
-# docker-compose.override.yml
-
-# # === Jupyter (if used) ===
-# .ipynb_checkpoints/
-
-# # === Git LFS placeholder (if using LFS) ===
-# *.lfs
-# 模型相关（重点忽略 services 中的大模型）
-services/models/
-services/ollama_models/
-services/**/weights/
-services/**/checkpoints/
-services/**/gguf/
-services/**/llama*
-services/**/*.bin
-services/**/*.ckpt
-services/**/*.safetensors
-
-# node_modules 和构建产物
+# Node.js 和构建
 node_modules/
 dist/
 out/
 
-# 音频/视频缓存
+# 日志、音频、临时文件
+*.log
 *.wav
 *.mp3
-*.ogg
-*.webm
 
-# Python 与虚拟环境
-__pycache__/
-*.pyc
-*.pyo
-.venv/
-env/
-*.egg-info/
-
-# 配置与临时文件
-.env
-.cache/
-output/
-logs/
-*.log
-
-# 编辑器配置
+# IDE 和系统配置
 .vscode/
 .idea/
 .DS_Store
-
-# Docker 和脚本构建文件（不影响项目）
-*.tar
-docker-compose.override.yml
-
-# Jupyter
-.ipynb_checkpoints/
