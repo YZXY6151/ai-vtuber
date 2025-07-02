@@ -3,6 +3,6 @@ uvicorn[standard]
 transformers
 torch
 transformers>=4.39
-accelerate       S
+accelerate       
 sentencepiece
 python-dotenv
