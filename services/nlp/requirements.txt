@@ -3,6 +3,6 @@ uvicorn[standard]
 transformers
 torch
 transformers>=4.39
-accelerate          # 自动映射 CPU/GPU
+accelerate       S
 sentencepiece
 python-dotenv
