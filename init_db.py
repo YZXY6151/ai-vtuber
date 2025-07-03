@@ -12,7 +12,7 @@ cursor = conn.cursor()
 
 # 创建 persona_profiles 表
 cursor.execute("""
-CREATE TABLE IF NOT EXISTS persona_profiles (
+CREATE TABLE IF NOT EXISTS persona (
     id TEXT PRIMARY KEY,
     title_display TEXT,
     system_prompt TEXT,

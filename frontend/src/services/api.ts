@@ -1,12 +1,23 @@
 // frontend/src/services/api.ts
 
-// 统一在文件顶部定义后端服务的基础地址，方便后续切换与维护
 const ASR_BASE = import.meta.env.VITE_ASR_URL || 'http://localhost:8181';
 const NLP_BASE = import.meta.env.VITE_NLP_URL || 'http://localhost:8182';
 const TTS_BASE = import.meta.env.VITE_TTS_URL || 'http://localhost:8183';
-const TIMEOUT_MS = 30_000; // 请求超时 30 秒
+const TIMEOUT_MS = 30_000;
 
-// 通用的 fetch 超时封装
+
+interface ChatResponse {
+  reply: string;
+  meta?: {
+    important: boolean;
+    timestamp: number;
+    persona: string;
+    used_memory: boolean;
+    memory_ids: string[];
+  };
+}
+
+
 async function fetchWithTimeout(input: RequestInfo, init?: RequestInit): Promise<Response> {
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), TIMEOUT_MS);
@@ -28,7 +39,6 @@ export async function recognizeAudio(file: File): Promise<{ transcription: strin
     body: form,
   });
   if (!res.ok) {
-    // 抛出更详细的错误
     throw new Error(`ASR 请求失败：${res.status} ${res.statusText}`);
   }
   try {
@@ -38,42 +48,20 @@ export async function recognizeAudio(file: File): Promise<{ transcription: strin
   }
 }
 
-// /** 2. GPT 对话（NLP） */
-// export async function chatWithGPT(message: string): Promise<{ reply: string }> {
-//   const res = await fetchWithTimeout(`${NLP_BASE}/api/nlp/chat`, {
-//     method: 'POST',
-//     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-//     body: JSON.stringify({ message }),
-//   });
-//   if (!res.ok) {
-//     let errMsg = `NLP 请求失败：${res.status} ${res.statusText}`;
-//     try {
-//       const errJson = await res.json();
-//       if (errJson.error) errMsg += ` - ${errJson.error}`;
-//     } catch {}
-//     throw new Error(errMsg);
-//   }
-//   try {
-//     return await res.json();
-//   } catch {
-//     throw new Error('NLP 返回解析错误，非有效 JSON');
-//   }
-// }
-
-// frontend/src/services/api.ts
-
-/** 2. GPT 对话（NLP） */
-export async function chatWithGPT(message: string, persona: string): Promise<{ reply: string }> {
-  const res = await fetch("http://localhost:8182/api/nlp/chat", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message, persona }),
+/** 2. GPT 对话（NLP + session） */
+export async function chatWithSession(session_id: string, user_input: string): Promise<ChatResponse> {
+  const res = await fetch(`${NLP_BASE}/api/nlp/chat_with_session`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ session_id, user_input }),
   });
-  if (!res.ok) throw new Error("GPT请求失败");
-  return res.json();
+  if (!res.ok) {
+    let err = await res.text();
+    throw new Error(`NLP 请求失败：${res.status} - ${err}`);
+  }
+  const json = await res.json()
+  return json
 }
-
-
 
 /** 3. 语音合成（TTS） */
 export async function synthesizeSpeech(text: string): Promise<Blob> {
@@ -90,4 +78,20 @@ export async function synthesizeSpeech(text: string): Promise<Blob> {
   } catch {
     throw new Error('TTS 返回解析错误，非有效音频流');
   }
+}
+
+
+export async function createSessionWithPersona(persona_id: string, titlename = "临时会话"): Promise<string> {
+  const res = await fetch(`${NLP_BASE}/api/nlp/session/create`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      persona_id,
+      titlename,
+      user_id: "guest"
+    }),
+  });
+  if (!res.ok) throw new Error('Session 创建失败');
+  const data = await res.json();
+  return data.session_id;
 }

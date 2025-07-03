@@ -3,23 +3,18 @@ import React from 'react';
 import { ChatFlow } from './components/ChatFlow';
 import './App.css';
 
-/**
- * 全局错误边界组件
- */
 interface ErrorBoundaryState {
   hasError: boolean;
   errorInfo?: string;
 }
 
 export class ErrorBoundary extends React.Component<React.PropsWithChildren<{}>, ErrorBoundaryState> {
-  constructor(props: React.PropsWithChildren<{}>) {
-    super(props);
-    this.state = { hasError: false };
-  }
+  state: ErrorBoundaryState = { hasError: false };
 
   static getDerivedStateFromError(error: Error): ErrorBoundaryState {
     return { hasError: true, errorInfo: error.message };
   }
+
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
     console.error('ErrorBoundary 捕获到错误:', error, info);

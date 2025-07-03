@@ -28,3 +28,9 @@ def create_new_session(req: CreateSessionRequest):
         return {"session_id": session_id}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"创建会话失败：{e}")
+
+
+@router.post("/api/session/create")
+def create_session_api(user_id: str = "demo-user", persona_id: str = "gentle", titlename: str = "临时会话"):
+    session_id = create_session(user_id=user_id, persona_id=persona_id, titlename=titlename)
+    return {"session_id": session_id}

@@ -56,8 +56,9 @@ cd services/asr
 uvicorn app:app --host 0.0.0.0 --port 8181
 
 # 终端2：启动 NLP 服务（如 Ollama）
-cd services/nlp
-uvicorn app:app --host 0.0.0.0 --port 8182
+
+uvicorn services.nlp.app:app --host 0.0.0.0 --port 8182
+
 
 # 终端3：启动 TTS 服务
 cd services/tts
@@ -98,3 +99,5 @@ ollama run llama3
 🔚 完成！
 现在可在任意设备上复现完整 AI-VTuber 桌面体验。
 ------------------------------------------------------------
+
+npm install @vitejs/plugin-react --save-dev

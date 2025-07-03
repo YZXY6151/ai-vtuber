@@ -3,13 +3,22 @@ import sqlite3
 from typing import List, Dict
 
 DB_PATH = os.getenv("STM_DB_PATH", os.path.join(os.path.dirname(__file__), "../short_term_memory.db"))
-
-def query_recent_memories(session_id: str, limit: int = 5, include_important: bool = True, exclude_empty: bool = True,include_expired: bool = False) -> List[Dict]:
+def query_recent_memories(
+    session_id: str,
+    limit: int = 5,
+    include_important: bool = True,
+    exclude_empty: bool = True,
+    include_expired: bool = False,
+    with_ids: bool = False  # ✅ 新增参数
+) -> List[Dict]:
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
 
-    query = """
-        SELECT content, created_at, important
+    # ✅ 动态字段选择
+    select_fields = "id, content, created_at, important" if with_ids else "content, created_at, important"
+
+    query = f"""
+        SELECT {select_fields}
         FROM short_term_memory
         WHERE session_id = ?
     """
@@ -29,7 +38,21 @@ def query_recent_memories(session_id: str, limit: int = 5, include_important: bo
     rows = cursor.fetchall()
     conn.close()
 
-    return [
-        { "content": row[0], "created_at": row[1], "important": bool(row[2]) }
-        for row in rows
-    ]
+    # ✅ 构建返回对象
+    if with_ids:
+        return [
+            {
+                "id": row[0],
+                "content": row[1],
+                "created_at": row[2],
+                "important": bool(row[3])
+            } for row in rows
+        ]
+    else:
+        return [
+            {
+                "content": row[0],
+                "created_at": row[1],
+                "important": bool(row[2])
+            } for row in rows
+        ]

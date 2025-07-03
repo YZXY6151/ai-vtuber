@@ -1,27 +1,33 @@
-# generate_response_test.py
+# test_persona_chat.py
 
-from services.nlp.persona_manager import PersonaManager
-from services.nlp.db.session_db import create_session
+import requests
 
-def test_generate_response():
-    print("🧪 准备测试 AI 回复生成流程...")
+NLP_URL = "http://localhost:8182"
+MODEL = "gentle"  # 可替换为 tsundere / energetic / cool
 
-    # 创建新的 session，绑定 gentle persona
-    session_id = create_session(user_id="test-user", persona_id="gentle")
-    
-    print(f"📌 测试 session 创建完成: {session_id}（persona: gentle）")
+def create_session(persona_id):
+    res = requests.post(f"{NLP_URL}/api/nlp/session/create", json={
+        "persona_id": persona_id,
+        "titlename": f"测试-{persona_id}",
+        "user_id": "test"
+    })
+    return res.json()["session_id"]
 
-    # 模拟用户输入
-    user_input = "我今天有点烦躁，你能帮我放松一下心情吗？"
-
-    # 实例化 PersonaManager 并生成回复（只触发一次 persona 加载）
-    reply = PersonaManager(session_id).generate_response(session_id, user_input)
-
-    # 打印结果
-    print("\n🎯 用户输入:")
-    print(user_input)
-    print("\n🤖 AI 回复:")
-    print(reply)
+def send_message(session_id, message):
+    res = requests.post(f"{NLP_URL}/api/nlp/chat_with_session", json={
+        "session_id": session_id,
+        "user_input": message
+    })
+    data = res.json()
+    print(f"🗨️ 用户：{message}")
+    print(f"🤖 AI（{data['meta']['persona']}）回复：{data['reply']}")
+    if data["meta"]["memory_used"]:
+        print(f"📌 注入记忆：\n{data['meta']['memory_summary']}")
+    print("-" * 40)
 
 if __name__ == "__main__":
-    test_generate_response()
+    for persona in ["gentle", "tsundere", "energetic", "cool"]:
+        print(f"\n=== 测试 persona：{persona} ===")
+        session_id = create_session(persona)
+        send_message(session_id, "你好，可以介绍一下你自己吗？")
+        send_message(session_id, "我今天心情不好。")
