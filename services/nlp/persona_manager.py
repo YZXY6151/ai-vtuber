@@ -96,13 +96,22 @@ class PersonaManager:
         system_prompt = self.build_system_prompt(self.persona, recent_list)
 
         payload = {
-            "model": OLLAMA_MODEL,
+            "model": OLLAMA_MODEL,  # 建议用 "yi:9b-chat"
             "messages": [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_input}
+                {
+                    "role": "system",
+                    "content": system_prompt  # 打印调试确保完整
+                },
+                {
+                    "role": "user",
+                    "content": f"请用你的主播身份自然回答这个问题：{user_input}"
+                }
             ],
+            "temperature": 0.7,
+            "max_tokens": 300,
             "stream": False
         }
+
 
         try:
             response = requests.post(f"{OLLAMA_URL}/api/chat", json=payload)

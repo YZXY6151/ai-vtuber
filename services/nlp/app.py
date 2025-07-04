@@ -65,7 +65,7 @@ def chat_with_session(req: SessionChatRequest):
         user_input = req.user_input.strip()
 
         # 限制注入最近 5 条短期记忆
-        recent_memories = query_recent_memories(session_id=session_id, limit=5, with_ids=True)
+        recent_memories = query_recent_memories(session_id=session_id, limit=10, with_ids=True)
 
 
         manager = PersonaManager(session_id)
