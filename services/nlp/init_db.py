@@ -16,6 +16,9 @@ prompt_file = BASE_DIR / "prompt.txt"
 
 def init_persona_db():
     db_path = BASE_DIR / "sessions.db"
+    if db_path.exists():
+        print(f"✅ 数据库已存在，跳过初始化：{db_path.name}")
+        return
     conn = sqlite3.connect(db_path)
     c = conn.cursor()
     
@@ -77,6 +80,9 @@ def init_persona_db():
 
 def init_session_db():
     db_path = BASE_DIR / "session.db"
+    if db_path.exists():
+        print(f"✅ 数据库已存在，跳过初始化：{db_path.name}")
+        return
     conn = sqlite3.connect(db_path)
     c = conn.cursor()
     c.execute("""
@@ -96,6 +102,9 @@ def init_session_db():
 
 def init_short_term_memory_db():
     db_path = BASE_DIR / "short_term_memory.db"
+    if db_path.exists():
+        print(f"✅ 数据库已存在，跳过初始化：{db_path.name}")
+        return
     conn = sqlite3.connect(db_path)
     c = conn.cursor()
     c.execute("""
@@ -114,6 +123,9 @@ def init_short_term_memory_db():
 
 def init_memory_log_db():
     db_path = BASE_DIR / "memory_log.db"
+    if db_path.exists():
+        print(f"✅ 数据库已存在，跳过初始化：{db_path.name}")
+        return
     conn = sqlite3.connect(db_path)
     c = conn.cursor()
     c.execute("""
@@ -130,6 +142,9 @@ def init_memory_log_db():
 
 def init_long_term_memory_db():
     db_path = BASE_DIR / "long_term_memory.db"
+    if db_path.exists():
+        print(f"✅ 数据库已存在，跳过初始化：{db_path.name}")
+        return
     conn = sqlite3.connect(db_path)
     c = conn.cursor()
     c.execute("""
